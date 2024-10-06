@@ -23,11 +23,23 @@
             max-width: 600px;
             margin: 0 auto;
         }
-        .slider-container, .select-container {
+        .skin-tone-blocks {
+            display: flex;
+            justify-content: center;
             margin-bottom: 20px;
         }
-        input[type="range"] {
-            width: 100%;
+        .skin-tone-block {
+            width: 50px;
+            height: 50px;
+            margin: 5px;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .selected {
+            border: 2px solid #333;
+        }
+        .select-container {
+            margin-bottom: 20px;
         }
         .color-palette {
             display: flex;
@@ -61,13 +73,16 @@
 
     <div class="container">
         <h1>The Chic Insider</h1>
-        <p>Discover your personalized color palette based on your skin tone and undertone. This tool helps all skin tones, from the darkest to the lightest, in a chic and unbiased way.</p>
+        <p>Select your skin tone and undertone to discover your personalized color palette.</p>
 
-        <!-- Skin Tone Selector -->
-        <div class="slider-container">
-            <label for="skin-tone">Select Your Skin Tone (0 = Darkest, 100 = Lightest):</label><br>
-            <input type="range" id="skin-tone" name="skin-tone" min="0" max="100" value="50">
-            <span id="tone-value">50</span>
+        <!-- Skin Tone Selection (Color Blocks) -->
+        <div class="skin-tone-blocks" id="skin-tone-blocks">
+            <!-- These blocks will represent skin tones from darkest to lightest -->
+            <div class="skin-tone-block" style="background-color: #4b3621;" data-tone="dark"></div>
+            <div class="skin-tone-block" style="background-color: #6b4f3f;" data-tone="medium-dark"></div>
+            <div class="skin-tone-block" style="background-color: #a67b5b;" data-tone="medium"></div>
+            <div class="skin-tone-block" style="background-color: #c19a6b;" data-tone="medium-light"></div>
+            <div class="skin-tone-block" style="background-color: #f1d8b5;" data-tone="light"></div>
         </div>
 
         <!-- Undertone Selector -->
@@ -88,20 +103,34 @@
     </div>
 
     <script>
-        // Update skin tone value display
-        const skinToneSlider = document.getElementById('skin-tone');
-        const toneValue = document.getElementById('tone-value');
-        skinToneSlider.oninput = function() {
-            toneValue.innerHTML = this.value;
-        }
+        let selectedTone = null;
+
+        // Add click events to each skin tone block
+        const skinToneBlocks = document.querySelectorAll('.skin-tone-block');
+        skinToneBlocks.forEach(block => {
+            block.addEventListener('click', function() {
+                // Remove the 'selected' class from all blocks
+                skinToneBlocks.forEach(b => b.classList.remove('selected'));
+                
+                // Add 'selected' class to the clicked block
+                this.classList.add('selected');
+                
+                // Set the selected tone based on the clicked block's data-tone
+                selectedTone = this.getAttribute('data-tone');
+            });
+        });
 
         // Function to generate a color palette based on skin tone and undertone
         function generatePalette() {
-            const skinTone = parseInt(document.getElementById('skin-tone').value);
             const undertone = document.getElementById('undertone').value;
 
-            // Base color generation based on skin tone and undertone
-            const baseColor = calculateBaseColor(skinTone, undertone);
+            if (!selectedTone) {
+                alert('Please select a skin tone.');
+                return;
+            }
+
+            // Generate a base color based on skin tone and undertone
+            const baseColor = calculateBaseColor(selectedTone, undertone);
 
             // Clear previous palette
             const paletteContainer = document.getElementById('color-palette');
@@ -123,12 +152,32 @@
             }
         }
 
-        // Base color calculator based on skin tone and undertone
+        // Function to calculate the base color based on skin tone and undertone
         function calculateBaseColor(tone, undertone) {
-            let r = Math.round(255 * (100 - tone) / 100);
-            let g = Math.round(200 * (100 - tone) / 100);
-            let b = Math.round(150 * tone / 100);
+            let r, g, b;
 
+            // Set RGB values based on skin tone
+            switch (tone) {
+                case 'dark':
+                    r = 75; g = 54; b = 33;
+                    break;
+                case 'medium-dark':
+                    r = 107; g = 79; b = 63;
+                    break;
+                case 'medium':
+                    r = 166; g = 123; b = 91;
+                    break;
+                case 'medium-light':
+                    r = 193; g = 154; b = 107;
+                    break;
+                case 'light':
+                    r = 241; g = 216; b = 181;
+                    break;
+                default:
+                    r = 200; g = 200; b = 200;
+            }
+
+            // Modify color based on undertone
             if (undertone === 'cool') {
                 r -= 10;
                 b += 20;
@@ -140,7 +189,7 @@
             return `rgb(${r}, ${g}, ${b})`;
         }
 
-        // Color adjustment for palette variety
+        // Function to adjust the base color for palette variety
         function adjustColor(baseColor, index) {
             let color = baseColor.match(/\d+/g).map(Number);
             let factor = 0.1 * index;
@@ -152,3 +201,4 @@
 
 </body>
 </html>
+
