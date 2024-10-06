@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Chic Insider - Color Scheme Generator</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            font-size: 2rem;
+        }
+        p {
+            color: #555;
+            margin-bottom: 30px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .slider-container, .select-container {
+            margin-bottom: 20px;
+        }
+        input[type="range"] {
+            width: 100%;
+        }
+        .color-palette {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .color-swatch {
+            width: 100px;
+            height: 100px;
+            margin: 5px;
+            border: 1px solid #ddd;
+        }
+        .color-label {
+            font-size: 12px;
+        }
+        button {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        button:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>The Chic Insider</h1>
+        <p>Discover your personalized color palette based on your skin tone and undertone. This tool helps all skin tones, from the darkest to the lightest, in a chic and unbiased way.</p>
+
+        <!-- Skin Tone Selector -->
+        <div class="slider-container">
+            <label for="skin-tone">Select Your Skin Tone (0 = Darkest, 100 = Lightest):</label><br>
+            <input type="range" id="skin-tone" name="skin-tone" min="0" max="100" value="50">
+            <span id="tone-value">50</span>
+        </div>
+
+        <!-- Undertone Selector -->
+        <div class="select-container">
+            <label for="undertone">Select Your Undertone:</label><br>
+            <select id="undertone" name="undertone">
+                <option value="cool">Cool</option>
+                <option value="warm">Warm</option>
+                <option value="neutral">Neutral</option>
+            </select>
+        </div>
+
+        <!-- Generate Button -->
+        <button onclick="generatePalette()">Generate My Colors</button>
+
+        <!-- Color Palette Output -->
+        <div id="color-palette" class="color-palette"></div>
+    </div>
+
+    <script>
+        // Update skin tone value display
+        const skinToneSlider = document.getElementById('skin-tone');
+        const toneValue = document.getElementById('tone-value');
+        skinToneSlider.oninput = function() {
+            toneValue.innerHTML = this.value;
+        }
+
+        // Function to generate a color palette based on skin tone and undertone
+        function generatePalette() {
+            const skinTone = parseInt(document.getElementById('skin-tone').value);
+            const undertone = document.getElementById('undertone').value;
+
+            // Base color generation based on skin tone and undertone
+            const baseColor = calculateBaseColor(skinTone, undertone);
+
+            // Clear previous palette
+            const paletteContainer = document.getElementById('color-palette');
+            paletteContainer.innerHTML = '';
+
+            // Generate a 5-color palette
+            for (let i = 0; i < 5; i++) {
+                const color = adjustColor(baseColor, i);
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch';
+                swatch.style.backgroundColor = color;
+
+                const label = document.createElement('p');
+                label.className = 'color-label';
+                label.innerText = color;
+
+                swatch.appendChild(label);
+                paletteContainer.appendChild(swatch);
+            }
+        }
+
+        // Base color calculator based on skin tone and undertone
+        function calculateBaseColor(tone, undertone) {
+            let r = Math.round(255 * (100 - tone) / 100);
+            let g = Math.round(200 * (100 - tone) / 100);
+            let b = Math.round(150 * tone / 100);
+
+            if (undertone === 'cool') {
+                r -= 10;
+                b += 20;
+            } else if (undertone === 'warm') {
+                r += 20;
+                b -= 10;
+            }
+
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        // Color adjustment for palette variety
+        function adjustColor(baseColor, index) {
+            let color = baseColor.match(/\d+/g).map(Number);
+            let factor = 0.1 * index;
+
+            color = color.map(c => Math.min(255, Math.round(c + (factor * 255))));
+            return `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+        }
+    </script>
+
+</body>
+</html>
